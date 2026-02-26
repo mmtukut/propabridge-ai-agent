@@ -1,0 +1,826 @@
+{
+    "metadata": {
+        "project": "PropaBridge",
+        "version": "1.0.0",
+        "description": "Base context dictionary for Gemini Pro RAG pipeline and AI Search Agent",
+        "market_coverage": [
+            "Abuja",
+            "Kaduna"
+        ],
+        "currency": "Nigerian Naira (NGN)",
+        "last_updated": "2025-Q1",
+        "disclaimer": "Rental price ranges are indicative estimates based on prevailing market data and may vary by specific location, property condition, and negotiation."
+    },
+    "terminology": {
+        "formal_legal_terms": {
+            "Landlord": {
+                "definition": "A person or corporate entity that owns a property and leases or rents it to another party (the tenant) in exchange for rent payments.",
+                "nigerian_context": "In Nigeria, landlords are legally governed by the Tenancy Laws of respective states. Lagos State has the Tenancy Law 2011, while Abuja (FCT) is governed by the Recovery of Premises Act. Landlords must provide a habitable property and cannot forcefully evict tenants without a court order. Many Nigerian landlords demand 1–2 years' rent upfront.",
+                "synonyms": [
+                    "Property Owner",
+                    "Lessor",
+                    "Oga (informal)"
+                ],
+                "legal_references": [
+                    "Recovery of Premises Act (FCT)",
+                    "State Tenancy Laws"
+                ]
+            },
+            "Tenant": {
+                "definition": "An individual or organization that occupies a property owned by a landlord under a tenancy agreement, typically in exchange for periodic rent payments.",
+                "nigerian_context": "Nigerian tenants often face the challenge of paying advance rent ranging from 6 months to 2 years. Tenant rights are protected under state tenancy laws, but enforcement is often weak. Tenants in the FCT must receive at least 6 months' quit notice for residential properties.",
+                "synonyms": [
+                    "Lessee",
+                    "Occupant",
+                    "Renter"
+                ],
+                "legal_references": [
+                    "Recovery of Premises Act (FCT)",
+                    "State Tenancy Laws"
+                ]
+            },
+            "Tenancy Agreement": {
+                "definition": "A legally binding contract between a landlord and tenant that outlines the terms and conditions of the rental arrangement, including rent amount, duration, rights, and obligations of both parties.",
+                "nigerian_context": "In Nigeria, tenancy agreements should be stamped at the State Inland Revenue Service to be legally enforceable. A typical Nigerian tenancy agreement covers: rent amount and payment schedule, duration (usually 1 year renewable), permitted use of property, maintenance responsibilities, quit notice period, and conditions for termination. Agreements above 3 years must be registered as a Deed of Lease.",
+                "key_clauses": [
+                    "Rent amount and payment frequency",
+                    "Tenancy duration and renewal terms",
+                    "Security deposit / caution fee",
+                    "Permitted use of the property",
+                    "Maintenance and repair responsibilities",
+                    "Quit notice period",
+                    "Termination conditions"
+                ],
+                "synonyms": [
+                    "Lease Agreement",
+                    "Rent Agreement",
+                    "Rental Contract"
+                ]
+            },
+            "Certificate_of_Occupancy": {
+                "term": "Certificate of Occupancy (C of O)",
+                "definition": "A statutory document issued by a State Governor (through the Ministry of Lands) under the Land Use Act of 1978, granting an individual or organization the legal right to occupy and use a piece of land for a specified period — typically 99 years for residential land.",
+                "nigerian_context": "The C of O is considered the highest and most secure form of land title in Nigeria. It is evidence that the government has recognized your right to occupy the land. A property with a C of O is significantly more valuable and easier to mortgage than one without. Always verify authenticity of a C of O at the relevant State Land Registry before purchase.",
+                "importance_score": "Highest — Primary title document",
+                "typical_processing_time": "6 months to 3 years (varies by state)",
+                "common_issues": [
+                    "Forged C of O documents",
+                    "Multiple C of O issued on same land (double allocation)",
+                    "Delay in government processing",
+                    "High administrative charges"
+                ],
+                "synonyms": [
+                    "C of O",
+                    "Land Certificate",
+                    "Governor's Consent"
+                ]
+            },
+            "Deed_of_Assignment": {
+                "term": "Deed of Assignment",
+                "definition": "A legal document used to transfer the ownership or interest in a property from one party (the Assignor) to another (the Assignee). It is the primary instrument for conveying property rights in Nigeria.",
+                "nigerian_context": "A Deed of Assignment must be executed before two witnesses and registered at the Land Registry. It must be stamped (Stamp Duty paid) and the Governor's Consent must be obtained under the Land Use Act. Without Governor's Consent, the assignment is incomplete and invalid under Nigerian law. It is the most common document used during property sales.",
+                "key_components": [
+                    "Description of the parties (Assignor and Assignee)",
+                    "Detailed description of the property",
+                    "Consideration (purchase price)",
+                    "Terms and conditions of transfer",
+                    "Signature of parties and witnesses",
+                    "Notarial acknowledgement"
+                ],
+                "synonyms": [
+                    "Assignment",
+                    "Title Deed",
+                    "Conveyance Document"
+                ]
+            },
+            "Gazette": {
+                "definition": "An official government publication (Government Gazette) that announces government acquisitions of land, revocations of title, or other public land use decisions. A gazette notice can strip private individuals of land ownership when the government acquires land for public purposes.",
+                "nigerian_context": "In Nigerian real estate due diligence, buyers must check if a property is 'gazetted' — meaning the government has officially acquired or reserved that land for public use (roads, schools, hospitals, etc.). Building on or purchasing gazetted land is extremely risky as the government can demolish structures without compensation. Estate surveyors always conduct gazette searches before property transactions.",
+                "due_diligence_action": "Always conduct a Gazette Search at the Ministry of Lands before purchasing any property.",
+                "risk_level": "Critical — Can result in total loss of property"
+            },
+            "Mortgage": {
+                "definition": "A legal agreement by which a bank, mortgage institution, or financial body lends money to a borrower (mortgagor) to purchase property, with the property itself serving as collateral/security for the loan.",
+                "nigerian_context": "Mortgages are relatively underdeveloped in Nigeria compared to Western markets. Key players include the Federal Mortgage Bank of Nigeria (FMBN), primary mortgage banks, and commercial banks. The National Housing Fund (NHF) enables Nigerian workers to access mortgage loans through FMBN. Interest rates are typically high (18–28% p.a.) and tenors range from 10–25 years. A property with a C of O or Governor's Consent is preferred as collateral.",
+                "types": [
+                    "Contributory Mortgage (National Housing Fund)",
+                    "Commercial Mortgage",
+                    "Equity Mortgage",
+                    "Construction Mortgage"
+                ],
+                "key_institutions": [
+                    "Federal Mortgage Bank of Nigeria (FMBN)",
+                    "Federal Mortgage Finance Ltd (FMFL)",
+                    "Commercial Banks",
+                    "Primary Mortgage Banks (PMBs)"
+                ],
+                "synonyms": [
+                    "Home Loan",
+                    "Property Loan",
+                    "Housing Loan"
+                ]
+            },
+            "Encumbrance": {
+                "definition": "A claim, lien, charge, or liability attached to a property that limits its use or transferability. An encumbrance is any burden on a property's title that reduces its value or restricts free transfer.",
+                "nigerian_context": "Common encumbrances in Nigerian real estate include: unpaid mortgages, court orders or injunctions, government acquisition, family/communal land disputes, easements (rights of way), and caveats filed at the land registry. Buyers must conduct proper due diligence and a search at the Land Registry to uncover any existing encumbrances before purchase.",
+                "types": [
+                    "Financial encumbrances (mortgages, liens, charges)",
+                    "Legal encumbrances (easements, restrictive covenants)",
+                    "Family land disputes / communal claims",
+                    "Government acquisition / gazette",
+                    "Court injunctions / caveats"
+                ],
+                "due_diligence_action": "Conduct a Land Registry Search and obtain a Search Report to identify encumbrances."
+            },
+            "REIT": {
+                "term": "REIT (Real Estate Investment Trust)",
+                "definition": "A company that owns, operates, or finances income-generating real estate. REITs allow individual investors to invest in portfolios of real estate assets in the same way they invest in other industries — by purchasing shares on the stock exchange.",
+                "nigerian_context": "REITs in Nigeria are regulated by the Securities and Exchange Commission (SEC) and listed on the Nigerian Exchange Group (NGX). They provide Nigerians with an opportunity to invest in real estate without directly buying property. REIT income (at least 90% of taxable income) must be distributed as dividends. Notable Nigerian REITs include UPDC REIT and SFS REIT.",
+                "benefits": [
+                    "Accessible real estate investment (low entry capital)",
+                    "Portfolio diversification",
+                    "Regular dividend income",
+                    "High liquidity (traded on NGX)",
+                    "Professional property management"
+                ],
+                "nigerian_examples": [
+                    "UPDC REIT",
+                    "SFS Real Estate Investment Trust"
+                ],
+                "regulator": "Securities and Exchange Commission (SEC) Nigeria"
+            },
+            "Site_Inspection": {
+                "term": "Site Inspection",
+                "definition": "A physical visit to a property or land to assess its actual condition, dimensions, infrastructure, environment, and suitability before purchase, rental, or development.",
+                "nigerian_context": "Site inspection is a critical due diligence step in Nigerian real estate because online listings and agent descriptions frequently exaggerate property features. During inspection, buyers/tenants should verify: property boundaries vs. survey plan, structural integrity of the building, availability and reliability of water and electricity, drainage and flood history, proximity to amenities (roads, markets, schools), neighborhood security assessment, and presence of encroachments or trespassers.",
+                "checklist": [
+                    "Structural integrity (walls, roof, foundation)",
+                    "Plumbing and sanitation",
+                    "Electrical systems",
+                    "Water availability (borehole, public supply, tank)",
+                    "Security features (fence, gate, CCTV)",
+                    "Access roads condition",
+                    "Flood/drainage assessment",
+                    "Neighborhood safety assessment",
+                    "Boundary verification against survey plan"
+                ],
+                "recommended_professionals": [
+                    "Estate Surveyor and Valuer",
+                    "Structural Engineer",
+                    "Quantity Surveyor"
+                ]
+            },
+            "Stamp_Duty": {
+                "term": "Stamp Duty",
+                "definition": "A government tax levied on legal documents and instruments — particularly those relating to property transactions — to make them legally valid and admissible as evidence in court.",
+                "nigerian_context": "In Nigeria, Stamp Duty is administered by the Federal Inland Revenue Service (FIRS) for corporate transactions and by State Inland Revenue Services for individual transactions. For tenancy agreements, stamp duty is typically: 0.78% of total rent for tenancies of 7 years or less, 3% for 7 to 21 years, and 6% for over 21 years. For property sales (Deed of Assignment), ad valorem stamp duty applies. Since 2021, electronic stamp duty has been introduced for digital transactions.",
+                "rates": {
+                    "tenancy_up_to_7_years": "0.78% of total annual rent",
+                    "tenancy_7_to_21_years": "3% of total annual rent",
+                    "tenancy_above_21_years": "6% of total annual rent",
+                    "deed_of_assignment": "Ad valorem (varies by property value)"
+                },
+                "administering_bodies": [
+                    "Federal Inland Revenue Service (FIRS)",
+                    "State Inland Revenue Services (SIRS)"
+                ],
+                "importance": "Unstamped documents are not admissible as evidence in Nigerian courts."
+            }
+        },
+        "local_slang_and_informal_terms": {
+            "BQ": {
+                "term": "BQ (Boys' Quarters)",
+                "definition": "A separate, smaller self-contained or non-self-contained accommodation unit built within the same compound as the main house, originally intended for domestic staff (house boys, guards, drivers).",
+                "nigerian_context": "BQs are very common in Nigerian middle-class and upscale residential properties. They typically consist of 1 room, a bathroom/toilet, and sometimes a kitchenette. In modern usage, BQs are often rented out as budget accommodation to young professionals or students. Increasingly referred to as 'Servants' Quarters (SQ)' in formal listings.",
+                "typical_size": "1 room, 1 bathroom (20–40 sqm)",
+                "typical_annual_rent_abuja": "₦300,000 – ₦800,000",
+                "typical_annual_rent_kaduna": "₦150,000 – ₦400,000",
+                "synonyms": [
+                    "Boys Quarters",
+                    "BQ",
+                    "Servants' Quarters",
+                    "SQ",
+                    "Outbuilding"
+                ]
+            },
+            "Self_con": {
+                "term": "Self-con (Self-Contained)",
+                "definition": "A single room apartment that has its own private bathroom and toilet facility (and often a small cooking area) within the room or as an annex — making it independent of shared facilities.",
+                "nigerian_context": "Self-con apartments are the most popular entry-level rental option in Nigerian cities, especially for young professionals, students, and single individuals. The key distinction from a 'room and parlour' is that bathroom/toilet are private and exclusive to the occupant. Sizes and quality vary widely.",
+                "typical_features": [
+                    "1 room (living/sleeping combined)",
+                    "Private bathroom and toilet",
+                    "Small kitchen space or kitchenette",
+                    "Sometimes includes a small sitting area"
+                ],
+                "typical_annual_rent_abuja": "₦400,000 – ₦1,200,000",
+                "typical_annual_rent_kaduna": "₦200,000 – ₦600,000",
+                "synonyms": [
+                    "Self-Contain",
+                    "Studio Apartment",
+                    "Single Room Self-Con"
+                ]
+            },
+            "Face_me_I_face_you": {
+                "term": "Face-me-I-face-you",
+                "definition": "A type of low-cost communal housing arrangement where multiple single rooms are arranged facing each other along a shared corridor, with all occupants sharing communal bathroom, toilet, and kitchen facilities.",
+                "nigerian_context": "Face-me-I-face-you compounds are the oldest and most affordable form of urban housing in Nigeria, prevalent in older inner-city areas and low-income neighborhoods. They house many families/individuals who share limited resources. Privacy is minimal. Common in areas like Lugbe (Abuja outskirts), Barnawa (Kaduna), and older parts of Lagos Island. Also called 'Barrack' in some regions.",
+                "typical_features": [
+                    "Single rooms (one per tenant/family)",
+                    "Shared corridor (hallway between facing rooms)",
+                    "Communal bathroom and toilet",
+                    "Communal cooking area or open yard cooking",
+                    "Multiple families in one compound"
+                ],
+                "typical_annual_rent_abuja": "₦80,000 – ₦250,000 per room",
+                "typical_annual_rent_kaduna": "₦60,000 – ₦180,000 per room",
+                "synonyms": [
+                    "Face-me-Face-you",
+                    "Barrack",
+                    "Tenement Housing",
+                    "Compound House",
+                    "Rooming House"
+                ]
+            },
+            "Off_Plan": {
+                "term": "Off-Plan (Buying Off-Plan)",
+                "definition": "Purchasing a property before it has been built or completed, based on architectural plans, drawings, and the developer's promise of delivery.",
+                "nigerian_context": "Off-plan purchases are increasingly popular in Abuja and Lagos for premium developments. Buyers typically get lower prices and can pay in installments. Risks include developer insolvency, project abandonment, delivery delays, and final product not matching original plans. Always verify the developer's track record and legal documentation before committing to an off-plan purchase."
+            },
+            "Omo_Onile": {
+                "term": "Omo Onile",
+                "definition": "Yoruba term for 'children of the landowner' — refers to local community members or land-owning families who extort money from property developers or buyers on land they claim ancestral rights over, even after legal transactions have been completed.",
+                "nigerian_context": "Omo Onile is a significant challenge in Lagos and southwestern Nigerian real estate. They often demand illegal payments for 'permission' to develop land. Their interference can delay construction and lead to financial losses. Buyers should engage estate lawyers and ensure proper documentation before development. The term has expanded to refer generally to land-related extortion gangs."
+            },
+            "Caution_Fee": {
+                "term": "Caution Fee (Security Deposit)",
+                "definition": "A refundable deposit collected by the landlord from the tenant at the commencement of tenancy, intended to cover potential damages to the property beyond normal wear and tear.",
+                "nigerian_context": "Nigerian landlords typically collect a caution fee equivalent to 1–2 months' rent. It should be refunded at the end of the tenancy after property inspection, minus deductions for damages. In practice, many landlords find spurious reasons to withhold caution fees. Tenants should document the property's condition at entry with photographs."
+            },
+            "Agent_Fee": {
+                "term": "Agent Fee (Agency Commission)",
+                "definition": "The commission paid to a real estate agent for facilitating a property transaction (rental or sale). In Nigeria, this is typically paid by the prospective tenant or buyer.",
+                "nigerian_context": "Standard agent fee in most Nigerian cities is 10% of annual rent, paid by the tenant. Some agents charge a flat fee. For property sales, agent commission is typically 5–10% of the sale price. Nigeria does not have a unified regulatory body enforcing agent fees, so rates can vary significantly. Always clarify and agree on agent fees before commencing a property search."
+            },
+            "Agreement_and_Commission": {
+                "term": "Agreement Fee",
+                "definition": "The cost of preparing, executing, and stamping the tenancy agreement document.",
+                "nigerian_context": "Typically charged separately from agent commission. Usually ranges from ₦20,000 to ₦100,000 depending on the property value and lawyer involved."
+            }
+        }
+    },
+    "neighborhoods_abuja": {
+        "overview": "Abuja (Federal Capital Territory) is Nigeria's planned capital city. Its real estate market is structured around districts and satellite towns, with prices heavily influenced by proximity to the city center, security, and available infrastructure.",
+        "tiers": {
+            "Premium": {
+                "description": "High-end districts with excellent infrastructure, security, diplomatic missions, embassies, high-net-worth residents, and premium amenities. Primarily government officials, executives, diplomats, and high-income professionals.",
+                "estimated_2bed_annual_rent": {
+                    "range_ngn": "₦6,000,000 – ₦18,000,000",
+                    "range_usd_approx": "$3,800 – $11,500",
+                    "notes": "Top-tier furnished apartments and serviced residences can exceed ₦30,000,000 per annum."
+                },
+                "districts": {
+                    "Maitama": {
+                        "description": "The most prestigious residential district in Abuja. Home to embassies, ambassadorial residences, senior government officials, and top executives. Features wide, well-maintained roads and lush greenery.",
+                        "key_features": [
+                            "Embassies and high commissions",
+                            "High security (armed guards, CCTV)",
+                            "Premium schools nearby (British, American)",
+                            "Upscale restaurants and retail",
+                            "Low population density"
+                        ],
+                        "property_types": [
+                            "Detached duplexes",
+                            "Luxury apartments",
+                            "Mansions",
+                            "Serviced residences"
+                        ],
+                        "annual_rent_2bed_ngn": "₦8,000,000 – ₦18,000,000",
+                        "coordinates": {
+                            "latitude": 9.0897,
+                            "longitude": 7.4891
+                        }
+                    },
+                    "Asokoro": {
+                        "description": "Abuja's second most prestigious district, housing the Presidential Villa (Aso Rock), senior government ministers, Supreme Court Justices, and diplomatic missions. Extremely high security.",
+                        "key_features": [
+                            "Presidential Villa proximity",
+                            "Diplomatic zone",
+                            "Top-tier security",
+                            "Well-paved roads",
+                            "Exclusive clubs and hotels"
+                        ],
+                        "property_types": [
+                            "Government quarters",
+                            "Private mansions",
+                            "Luxury duplexes",
+                            "High-end apartments"
+                        ],
+                        "annual_rent_2bed_ngn": "₦7,000,000 – ₦15,000,000",
+                        "coordinates": {
+                            "latitude": 9.0497,
+                            "longitude": 7.5178
+                        }
+                    },
+                    "Wuse_2": {
+                        "description": "A highly commercial and residential premium district. Hub of banking, corporate offices, upscale restaurants, and embassies. One of the most active real estate markets in Abuja.",
+                        "key_features": [
+                            "Major banks and corporate HQs",
+                            "High commercial activity",
+                            "Premium restaurants and nightlife",
+                            "Easy access to major roads",
+                            "Diplomatic presence"
+                        ],
+                        "property_types": [
+                            "Luxury apartments",
+                            "Serviced apartments",
+                            "Duplexes",
+                            "Commercial properties"
+                        ],
+                        "annual_rent_2bed_ngn": "₦6,500,000 – ₦14,000,000",
+                        "coordinates": {
+                            "latitude": 9.0700,
+                            "longitude": 7.4893
+                        }
+                    },
+                    "Garki_1_and_2": {
+                        "description": "One of the oldest and most established districts in Abuja. Mix of government establishments, corporate offices, and premium residences. Well-planned with good infrastructure.",
+                        "key_features": [
+                            "Government ministries",
+                            "Corporate offices",
+                            "International hotels",
+                            "Good road network",
+                            "Established neighborhood"
+                        ],
+                        "property_types": [
+                            "Apartment blocks",
+                            "Duplexes",
+                            "Government quarters",
+                            "Commercial premises"
+                        ],
+                        "annual_rent_2bed_ngn": "₦6,000,000 – ₦12,000,000",
+                        "coordinates": {
+                            "latitude": 9.0553,
+                            "longitude": 7.4925
+                        }
+                    },
+                    "Jabi": {
+                        "description": "An upscale district known for Jabi Lake Mall, recreational facilities, and a mix of corporate and residential developments. Increasingly popular with young professionals and expatriates.",
+                        "key_features": [
+                            "Jabi Lake Mall",
+                            "Recreational lake and park",
+                            "Hotels and serviced apartments",
+                            "Active nightlife",
+                            "Growing commercial district"
+                        ],
+                        "property_types": [
+                            "Luxury apartments",
+                            "Serviced apartments",
+                            "Duplexes"
+                        ],
+                        "annual_rent_2bed_ngn": "₦5,500,000 – ₦12,000,000",
+                        "coordinates": {
+                            "latitude": 9.0869,
+                            "longitude": 7.4437
+                        }
+                    }
+                }
+            },
+            "Mid_Range": {
+                "description": "Comfortable, established residential districts with reasonable infrastructure. Popular with civil servants, professionals, SME owners, and middle-class families. Good value for money.",
+                "estimated_2bed_annual_rent": {
+                    "range_ngn": "₦2,000,000 – ₦5,500,000",
+                    "notes": "Price varies significantly within districts based on proximity to major roads, estate type, and property age."
+                },
+                "districts": {
+                    "Wuse_1": {
+                        "description": "Older, more established part of Wuse. Mix of residential and commercial use. Good central location with access to markets (Wuse Market) and transport links.",
+                        "key_features": [
+                            "Wuse Market proximity",
+                            "Central location",
+                            "Mix of old and new builds",
+                            "Good road network"
+                        ],
+                        "annual_rent_2bed_ngn": "₦2,500,000 – ₦5,000,000",
+                        "coordinates": {
+                            "latitude": 9.0667,
+                            "longitude": 7.4833
+                        }
+                    },
+                    "Gwarinpa": {
+                        "description": "One of Africa's largest housing estates, developed by the FCDA. Large, well-planned residential district popular with civil servants and middle-class families. Good community infrastructure.",
+                        "key_features": [
+                            "Largest housing estate in Africa",
+                            "Well-planned road network",
+                            "Schools, hospitals, and markets",
+                            "Active community associations",
+                            "Good security"
+                        ],
+                        "property_types": [
+                            "Terrace houses",
+                            "Semi-detached",
+                            "Bungalows",
+                            "Block of flats"
+                        ],
+                        "annual_rent_2bed_ngn": "₦2,000,000 – ₦4,500,000",
+                        "coordinates": {
+                            "latitude": 9.1239,
+                            "longitude": 7.4219
+                        }
+                    },
+                    "Utako": {
+                        "description": "A rapidly developing district with a mix of commercial and residential properties. Known for car dealerships, shopping centers, and a growing hospitality sector. Good road access.",
+                        "key_features": [
+                            "Commercial growth",
+                            "Car dealerships and showrooms",
+                            "Shopping centers",
+                            "Proximity to Maitama"
+                        ],
+                        "annual_rent_2bed_ngn": "₦2,500,000 – ₦5,000,000",
+                        "coordinates": {
+                            "latitude": 9.0931,
+                            "longitude": 7.4581
+                        }
+                    },
+                    "Kado": {
+                        "description": "A quieter, residential district with a mix of professionals and families. Good security and proximity to Jabi and Maitama makes it attractive to mid-range renters.",
+                        "annual_rent_2bed_ngn": "₦2,200,000 – ₦4,800,000",
+                        "coordinates": {
+                            "latitude": 9.1017,
+                            "longitude": 7.4278
+                        }
+                    },
+                    "Durumi": {
+                        "description": "A mid-range district with a mix of residential estates and commercial activity. Close to Area 1 and Garki. Popular with civil servants.",
+                        "annual_rent_2bed_ngn": "₦2,000,000 – ₦4,200,000",
+                        "coordinates": {
+                            "latitude": 9.0303,
+                            "longitude": 7.4742
+                        }
+                    },
+                    "Lifecamp": {
+                        "description": "A growing residential area on the outskirts transitioning toward mid-range. Known for estate developments and proximity to Gwarinpa.",
+                        "annual_rent_2bed_ngn": "₦1,800,000 – ₦4,000,000",
+                        "coordinates": {
+                            "latitude": 9.1400,
+                            "longitude": 7.4050
+                        }
+                    }
+                }
+            },
+            "Affordable_Upcoming": {
+                "description": "Satellite towns and rapidly developing areas on Abuja's outskirts. Primarily occupied by lower-middle-class workers, civil servants, traders, and young families. Infrastructure is developing but some areas lack consistent utilities.",
+                "estimated_2bed_annual_rent": {
+                    "range_ngn": "₦600,000 – ₦1,800,000",
+                    "notes": "Prices have been rising rapidly in these areas due to urban expansion and increasing demand from workers priced out of core districts."
+                },
+                "districts": {
+                    "Kubwa": {
+                        "description": "One of Abuja's largest satellite towns. A self-sustaining community with markets, schools, hospitals, and commercial centers. Very high population density. Good road access to the city center.",
+                        "key_features": [
+                            "Largest satellite town in Abuja",
+                            "Kubwa Express Road access",
+                            "Active market (Kubwa Market)",
+                            "Schools and hospitals",
+                            "High population density",
+                            "Community facilities"
+                        ],
+                        "property_types": [
+                            "Self-con",
+                            "1–3 bedroom flats",
+                            "BQ",
+                            "Face-me-I-face-you"
+                        ],
+                        "annual_rent_2bed_ngn": "₦800,000 – ₦1,800,000",
+                        "coordinates": {
+                            "latitude": 9.1614,
+                            "longitude": 7.3258
+                        }
+                    },
+                    "Lugbe": {
+                        "description": "A major satellite town along the Airport Road corridor. High commercial activity driven by proximity to Nnamdi Azikiwe International Airport. Popular with traders, hospitality workers, and airport staff.",
+                        "key_features": [
+                            "Airport proximity",
+                            "Active commercial strip",
+                            "Public transportation hub",
+                            "Growing real estate development"
+                        ],
+                        "property_types": [
+                            "Self-con",
+                            "Flats",
+                            "BQ",
+                            "Terrace houses in estates"
+                        ],
+                        "annual_rent_2bed_ngn": "₦700,000 – ₦1,600,000",
+                        "coordinates": {
+                            "latitude": 8.9817,
+                            "longitude": 7.3672
+                        }
+                    },
+                    "Gwagwalada": {
+                        "description": "A major satellite town and area council headquarters. Has a university (University of Abuja), teaching hospital, and active markets. One of the oldest satellite towns.",
+                        "key_features": [
+                            "University of Abuja",
+                            "University of Abuja Teaching Hospital",
+                            "Active markets",
+                            "Government institutions"
+                        ],
+                        "annual_rent_2bed_ngn": "₦500,000 – ₦1,200,000",
+                        "coordinates": {
+                            "latitude": 8.9436,
+                            "longitude": 7.0831
+                        }
+                    },
+                    "Kuje": {
+                        "description": "An area council headquarters with growing residential development. More rural feel but increasingly urbanizing. Affordable land prices attracting developers.",
+                        "annual_rent_2bed_ngn": "₦400,000 – ₦900,000",
+                        "coordinates": {
+                            "latitude": 8.8758,
+                            "longitude": 7.2244
+                        }
+                    },
+                    "Nyanya_and_Karu": {
+                        "description": "High-density satellite towns on the border of Abuja and Nasarawa State. Major transportation hubs. Very affordable but can be congested. Popular with daily commuters.",
+                        "key_features": [
+                            "Major transit hub",
+                            "High density",
+                            "Active markets",
+                            "Close to Abuja city center by express road"
+                        ],
+                        "annual_rent_2bed_ngn": "₦600,000 – ₦1,400,000",
+                        "coordinates": {
+                            "latitude": 9.0278,
+                            "longitude": 7.5542
+                        }
+                    },
+                    "Lokogoma": {
+                        "description": "A relatively newer and rapidly developing affordable district within the main city area. Popular with young professionals. More structured than outer satellite towns.",
+                        "annual_rent_2bed_ngn": "₦900,000 – ₦1,800,000",
+                        "coordinates": {
+                            "latitude": 8.9819,
+                            "longitude": 7.4386
+                        }
+                    },
+                    "Galadimawa": {
+                        "description": "An affordable upcoming district between Lugbe and Lokogoma. Rapidly growing with estate developments. Good road access via Airport Road.",
+                        "annual_rent_2bed_ngn": "₦800,000 – ₦1,600,000",
+                        "coordinates": {
+                            "latitude": 8.9994,
+                            "longitude": 7.4117
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "neighborhoods_kaduna": {
+        "overview": "Kaduna is a major commercial and industrial city in Northwest Nigeria, and one of the most important real estate markets outside Lagos and Abuja. The city has a blend of old government reservation areas (GRAs) from the colonial era and rapidly developing new districts. The market is more affordable than Abuja but offers strong rental yields.",
+        "tiers": {
+            "Premium": {
+                "description": "Kaduna's top-tier residential districts, typically Government Reservation Areas (GRAs) or exclusive estate developments. Occupied by senior government officials, top executives, expatriates, and high-income professionals.",
+                "estimated_2bed_annual_rent": {
+                    "range_ngn": "₦2,500,000 – ₦7,000,000",
+                    "notes": "Premium Kaduna properties are significantly more affordable than Abuja equivalents, offering strong investment value."
+                },
+                "districts": {
+                    "Kaduna_North_GRA": {
+                        "description": "The premier Government Reservation Area in Kaduna, established during the colonial era. Features wide tree-lined streets, large plots, and well-maintained infrastructure. Home to government officials, business leaders, and consular missions.",
+                        "key_features": [
+                            "Colonial-era planning",
+                            "Large plot sizes (900sqm – 2000sqm)",
+                            "Embassies and consular offices",
+                            "Top private schools nearby",
+                            "International Hotel (Hamdala)",
+                            "Well-paved roads"
+                        ],
+                        "property_types": [
+                            "Detached bungalows and duplexes",
+                            "Government quarters",
+                            "Mansions"
+                        ],
+                        "annual_rent_2bed_ngn": "₦3,000,000 – ₦7,000,000",
+                        "coordinates": {
+                            "latitude": 10.5372,
+                            "longitude": 7.4428
+                        }
+                    },
+                    "Malali_GRA": {
+                        "description": "Another prestigious GRA in Kaduna, often compared to Maitama in Abuja. Large residential plots, government quarters, and high-security environment. Home to top military officers and senior civil servants.",
+                        "key_features": [
+                            "Large residential plots",
+                            "Government and military quarters",
+                            "High security",
+                            "Good road infrastructure",
+                            "Close to Kaduna State Government House"
+                        ],
+                        "property_types": [
+                            "Detached houses",
+                            "Semi-detached duplexes",
+                            "Government bungalows"
+                        ],
+                        "annual_rent_2bed_ngn": "₦2,500,000 – ₦6,000,000",
+                        "coordinates": {
+                            "latitude": 10.5697,
+                            "longitude": 7.4203
+                        }
+                    },
+                    "Ungwan_Rimi": {
+                        "description": "An upscale district in the heart of Kaduna known for commercial activity, banking halls, and premium residential properties. Mix of commercial and residential use.",
+                        "key_features": [
+                            "Major banking district",
+                            "Corporate offices",
+                            "Upscale shops and eateries",
+                            "Central location"
+                        ],
+                        "annual_rent_2bed_ngn": "₦2,000,000 – ₦5,000,000",
+                        "coordinates": {
+                            "latitude": 10.5153,
+                            "longitude": 7.4372
+                        }
+                    },
+                    "Television_Estate": {
+                        "description": "A well-planned and secured residential estate housing media professionals, government officials, and business people. Named for its proximity to NTA Kaduna. Good infrastructure within the estate.",
+                        "annual_rent_2bed_ngn": "₦2,500,000 – ₦5,500,000",
+                        "coordinates": {
+                            "latitude": 10.5481,
+                            "longitude": 7.4256
+                        }
+                    }
+                }
+            },
+            "Mid_Range": {
+                "description": "Established and growing residential districts popular with civil servants, business owners, teachers, and middle-class families. Good community infrastructure with markets, schools, and clinics.",
+                "estimated_2bed_annual_rent": {
+                    "range_ngn": "₦800,000 – ₦2,500,000",
+                    "notes": "Mid-range Kaduna offers excellent value, with spacious apartments at prices well below comparable Abuja properties."
+                },
+                "districts": {
+                    "Barnawa": {
+                        "description": "One of Kaduna South's most established and largest residential neighborhoods. A vibrant, densely populated district with strong community identity. Has markets, schools, churches, mosques, and healthcare facilities.",
+                        "key_features": [
+                            "Barnawa Market",
+                            "High population density",
+                            "Mix of ethnicities and religions",
+                            "Active commercial strip",
+                            "Good transportation links"
+                        ],
+                        "property_types": [
+                            "Block of flats",
+                            "Self-con",
+                            "2–3 bedroom flats",
+                            "Mini-estates"
+                        ],
+                        "annual_rent_2bed_ngn": "₦900,000 – ₦2,000,000",
+                        "coordinates": {
+                            "latitude": 10.4658,
+                            "longitude": 7.4328
+                        }
+                    },
+                    "Sabon_Tasha": {
+                        "description": "A major residential and commercial district in Kaduna South. Known for its large market (Sabon Tasha Market), vibrant community, and mix of housing types. Popular with traders and SME owners.",
+                        "key_features": [
+                            "Sabon Tasha Market",
+                            "Active commercial area",
+                            "Mix of housing types",
+                            "Good road network"
+                        ],
+                        "annual_rent_2bed_ngn": "₦800,000 – ₦1,800,000",
+                        "coordinates": {
+                            "latitude": 10.4489,
+                            "longitude": 7.4253
+                        }
+                    },
+                    "Kabala_West": {
+                        "description": "A mid-range residential district with a growing number of estate developments. Popular with civil servants and professionals. Good access to Kaduna city center.",
+                        "annual_rent_2bed_ngn": "₦900,000 – ₦2,200,000",
+                        "coordinates": {
+                            "latitude": 10.5011,
+                            "longitude": 7.4139
+                        }
+                    },
+                    "Narayi": {
+                        "description": "A well-established residential neighborhood in Kaduna South. Mix of owner-occupied and rented properties. Strong community structure with good amenities.",
+                        "key_features": [
+                            "Well-established community",
+                            "Mix of housing types",
+                            "Schools and markets nearby"
+                        ],
+                        "annual_rent_2bed_ngn": "₦800,000 – ₦1,800,000",
+                        "coordinates": {
+                            "latitude": 10.4811,
+                            "longitude": 7.4528
+                        }
+                    },
+                    "Ungwan_Boro": {
+                        "description": "A mid-level district in central Kaduna known for its mix of residential and commercial properties. Good access to government offices and the city center.",
+                        "annual_rent_2bed_ngn": "₦900,000 – ₦2,000,000",
+                        "coordinates": {
+                            "latitude": 10.5089,
+                            "longitude": 7.4453
+                        }
+                    },
+                    "Rigasa": {
+                        "description": "One of Kaduna's most densely populated districts on the western side of the city. Transitioning from affordable to mid-range with increasing development and a major train station (Rigasa Station - Abuja-Kaduna rail line terminus).",
+                        "key_features": [
+                            "Rigasa Train Station (Abuja-Kaduna rail terminus)",
+                            "High density",
+                            "Active commercial area",
+                            "Growing infrastructure"
+                        ],
+                        "annual_rent_2bed_ngn": "₦700,000 – ₦1,600,000",
+                        "coordinates": {
+                            "latitude": 10.5278,
+                            "longitude": 7.3822
+                        }
+                    }
+                }
+            },
+            "Affordable": {
+                "description": "Lower-income and rapidly urbanizing neighborhoods on the periphery of Kaduna city. Primarily occupied by low-income earners, traders, artisans, and daily wage workers. Infrastructure is basic but improving.",
+                "estimated_2bed_annual_rent": {
+                    "range_ngn": "₦250,000 – ₦800,000",
+                    "notes": "These areas represent the most affordable formal housing markets in Kaduna and offer strong capital appreciation potential for long-term investors."
+                },
+                "districts": {
+                    "Tudun_Wada": {
+                        "description": "A densely populated and historically significant neighborhood in Kaduna North. One of the oldest residential areas, with a mix of very affordable housing and small commercial establishments.",
+                        "key_features": [
+                            "High density",
+                            "Affordable housing",
+                            "Active local markets",
+                            "Close to city center",
+                            "Well-established community"
+                        ],
+                        "property_types": [
+                            "Face-me-I-face-you",
+                            "Self-con",
+                            "1–2 bedroom flats"
+                        ],
+                        "annual_rent_2bed_ngn": "₦300,000 – ₦700,000",
+                        "coordinates": {
+                            "latitude": 10.5286,
+                            "longitude": 7.4553
+                        }
+                    },
+                    "Kawo": {
+                        "description": "An affordable district in Kaduna North with a mix of residential and commercial use. Known for Kawo Market. Good road access and transportation links.",
+                        "key_features": [
+                            "Kawo Market",
+                            "Transportation hub",
+                            "Affordable housing",
+                            "Commercial activity"
+                        ],
+                        "annual_rent_2bed_ngn": "₦280,000 – ₦650,000",
+                        "coordinates": {
+                            "latitude": 10.5667,
+                            "longitude": 7.4394
+                        }
+                    },
+                    "Sabo": {
+                        "description": "A vibrant and historic neighborhood in Kaduna known for its Yoruba and southern Nigerian community (Sabo means 'new area' in Hausa, originally referring to non-indigenous settlements). Active market and commercial strip.",
+                        "annual_rent_2bed_ngn": "₦300,000 – ₦700,000",
+                        "coordinates": {
+                            "latitude": 10.5133,
+                            "longitude": 7.4567
+                        }
+                    },
+                    "Kakuri": {
+                        "description": "An industrial and residential district in Kaduna South. Close to the old Kaduna Textile Mills. Growing with new residential developments. Popular with factory workers and artisans.",
+                        "key_features": [
+                            "Industrial area",
+                            "Affordable land",
+                            "New estate developments",
+                            "Proximity to Kaduna South industrial corridor"
+                        ],
+                        "annual_rent_2bed_ngn": "₦250,000 – ₦600,000",
+                        "coordinates": {
+                            "latitude": 10.4528,
+                            "longitude": 7.4614
+                        }
+                    },
+                    "Trikania": {
+                        "description": "An upcoming affordable neighborhood gaining popularity due to new estate developments and improving road infrastructure. Good for long-term investment.",
+                        "annual_rent_2bed_ngn": "₦300,000 – ₦750,000",
+                        "coordinates": {
+                            "latitude": 10.4917,
+                            "longitude": 7.3981
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "agent_instructions": {
+        "purpose": "This dictionary provides PropaBridge AI Search Agent with structured context for answering Nigerian real estate queries accurately.",
+        "usage_guidelines": [
+            "Always reference the terminology section when users ask about real estate terms, documents, or legal concepts.",
+            "Use neighborhood tier classifications to match user budgets to appropriate districts.",
+            "Always mention due diligence requirements when discussing property purchases.",
+            "Quote rental ranges as estimates and advise users to verify current rates with local agents.",
+            "When discussing land titles, always emphasize C of O as the gold standard and warn against purchasing land with no documentation.",
+            "Flag encumbrance and gazette risks proactively when users discuss purchasing property.",
+            "Recommend professional consultation (Estate Surveyor, Lawyer) for all major transactions."
+        ],
+        "disclaimer": "All rental price ranges are indicative estimates based on market data available as of early 2025. Prices may vary based on specific property conditions, location within district, amenities, and market dynamics. PropaBridge recommends verification with certified estate surveyors and valuers."
+    }
+}
