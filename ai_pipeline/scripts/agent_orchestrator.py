@@ -49,11 +49,19 @@ from pathlib import Path
 from typing import Optional
 
 import vertexai
+from google.cloud import firestore
 from google.oauth2 import service_account
 from vertexai.generative_models import GenerativeModel, GenerationConfig, SafetySetting, HarmCategory, HarmBlockThreshold
 
 # ── Sibling module (must be in same directory or on PYTHONPATH) ───────────────
 from query_helper import retrieve_chunks, format_context_for_gemini
+from prompts import (
+    SEARCH_AGENT_PROMPT,
+    FAQ_AGENT_PROMPT,
+    LEAD_QUALIFICATION_PROMPT,
+    split_lead_response,
+    LeadData,
+)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LOGGING
@@ -76,6 +84,7 @@ class Config:
     REGION               = "us-central1"
     SERVICE_ACCOUNT_FILE = Path(__file__).parent.parent / "service_account.json"
     GEMINI_MODEL         = "gemini-1.5-pro"
+    SESSION_COLLECTION   = "chat_sessions"
 
     # RAG retrieval settings
     TOP_K_PROPERTY       = 5   # chunks for PROPERTY_SEARCH
@@ -97,6 +106,10 @@ class Config:
         "how much", "cost", "tier", "premium", "mid-range", "face-me",
         "buy", "purchase", "sell", "landlord", "tenant", "caution fee",
     ]
+    LEAD_KEYWORDS = [
+        "agent", "contact", "view", "inspect", "ready", "interested", 
+        "looking for", "move in"
+    ]
     LEGAL_KEYWORDS = [
         "c of o", "certificate of occupancy", "deed of assignment", "gazette",
         "stamp duty", "tenancy agreement", "legal", "document", "title",
@@ -114,6 +127,7 @@ class Config:
 class Intent(str, Enum):
     PROPERTY_SEARCH = "PROPERTY_SEARCH"   # Neighborhood / rental / location queries
     LEGAL_FAQ       = "LEGAL_FAQ"         # Title docs, tenancy law, due diligence
+    LEAD_QUAL       = "LEAD_QUAL"         # High intent users ready to transact
     GENERAL_CHAT    = "GENERAL_CHAT"      # Greetings, off-topic, clarifications
 
 
@@ -135,24 +149,94 @@ class AgentResponse:
     latency_ms:      float
     model:           str = Config.GEMINI_MODEL
     retrieval_skipped: bool = False        # True for GENERAL_CHAT
+    lead_data:       Optional[LeadData] = None
 
     def __str__(self) -> str:
         lines = [
-            f"\n{'═'*62}",
+            f"\n{'='*62}",
             f"  PropaBridge AI Response",
-            f"{'═'*62}",
+            f"{'='*62}",
             f"  Intent   : {self.intent.value}",
             f"  Sources  : {self.sources_used} Firestore chunks",
             f"  City     : {self.city_filter or 'All markets'}",
             f"  Latency  : {self.latency_ms:.0f}ms",
-            f"{'─'*62}",
+            f"{'-'*62}",
             f"{self.answer}",
-            f"{'─'*62}",
+            f"{'-'*62}",
         ]
+        if self.lead_data:
+            lines.append(f"  [LEAD QUALIFIED] Score: {self.lead_data.score}/100 | Ready: {self.lead_data.escalate_to_agent}")
         if self.source_keys:
             lines.append(f"  Sources  : {', '.join(self.source_keys)}")
-        lines.append(f"{'═'*62}\n")
+        lines.append(f"{'='*62}\n")
         return "\n".join(lines)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MEMORY MANAGER (Phase D7)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class MemoryManager:
+    """Handles loading and saving conversation history to Firestore."""
+    
+    def __init__(self, db: firestore.Client):
+        self._db = db
+        self._collection = Config.SESSION_COLLECTION
+
+    def get_history(self, session_id: str, limit: int = 6) -> list[dict]:
+        """Fetch the last N turns for the given session."""
+        if not session_id:
+            return []
+            
+        try:
+            docs = (
+                self._db.collection(self._collection)
+                .document(session_id)
+                .collection("messages")
+                .order_by("timestamp", direction=firestore.Query.DESCENDING)
+                .limit(limit * 2)  # *2 because one turn = user msg + agent msg
+                .stream()
+            )
+            
+            # Sort chronologically
+            history = [doc.to_dict() for doc in docs]
+            history.reverse()
+            return history
+            
+        except Exception as e:
+            log.error(f"Failed to fetch history for session {session_id}: {e}")
+            return []
+
+    def save_turn(self, session_id: str, query: str, answer: str):
+        """Save a new user query and agent response to Firestore."""
+        if not session_id:
+            return
+            
+        try:
+            msg_ref = self._db.collection(self._collection).document(session_id).collection("messages")
+            
+            # Use batch to ensure exact timestamp ordering
+            batch = self._db.batch()
+            
+            user_doc = msg_ref.document()
+            batch.set(user_doc, {
+                "role": "user",
+                "content": query,
+                "timestamp": firestore.SERVER_TIMESTAMP
+            })
+            
+            agent_doc = msg_ref.document()
+            batch.set(agent_doc, {
+                "role": "agent",
+                "content": answer,
+                # Slight artificial delay to ensure sort order if timestamps match exactly
+                "timestamp": firestore.SERVER_TIMESTAMP
+            })
+            
+            batch.commit()
+            
+        except Exception as e:
+            log.error(f"Failed to save history for session {session_id}: {e}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -176,9 +260,13 @@ class IntentRouter:
         # ── Tier 1: keyword matching ─────────────────────────────────
         prop_hits  = sum(1 for kw in Config.PROPERTY_KEYWORDS if kw in q_lower)
         legal_hits = sum(1 for kw in Config.LEGAL_KEYWORDS    if kw in q_lower)
+        lead_hits  = sum(1 for kw in Config.LEAD_KEYWORDS     if kw in q_lower)
 
-        if prop_hits > 0 or legal_hits > 0:
-            if prop_hits >= legal_hits:
+        if prop_hits > 0 or legal_hits > 0 or lead_hits > 0:
+            if lead_hits > 0 and (lead_hits >= prop_hits and lead_hits >= legal_hits):
+                intent = Intent.LEAD_QUAL
+                confidence = min(0.6 + lead_hits * 0.1, 0.98)
+            elif prop_hits >= legal_hits:
                 intent = Intent.PROPERTY_SEARCH
                 confidence = min(0.6 + prop_hits * 0.08, 0.98)
             else:
@@ -187,7 +275,7 @@ class IntentRouter:
 
             log.info(
                 f"Intent (keyword): {intent.value}  "
-                f"[property={prop_hits}, legal={legal_hits}, city={city_hint}]"
+                f"[property={prop_hits}, legal={legal_hits}, lead={lead_hits}, city={city_hint}]"
             )
             return IntentResult(intent, confidence, city_hint, method="keyword")
 
@@ -214,7 +302,7 @@ class IntentRouter:
 
         prompt = f"""You are an intent classifier for PropaBridge, a Nigerian real estate platform.
 
-Classify the user's query into EXACTLY ONE of these three intents:
+Classify the user's query into EXACTLY ONE of these four intents:
 
 PROPERTY_SEARCH  — Questions about renting/buying property, neighborhoods, prices,
                    locations, districts, apartment types (BQ, self-con, duplex, etc.)
@@ -223,13 +311,16 @@ LEGAL_FAQ        — Questions about legal documents (C of O, Deed of Assignment
                    Tenancy Agreement, Stamp Duty, Gazette), tenant/landlord rights,
                    due diligence, mortgages, REITs, land titles.
 
+LEAD_QUAL        — High intent users ready to view properties, contact agents, or
+                   move in. E.g. "I want to rent a 2-bedroom next month."
+
 GENERAL_CHAT     — Greetings, off-topic, unclear, or questions not related to
                    Nigerian real estate.
 
 User query: "{query}"
 
 Respond with a single JSON object only — no explanation, no markdown:
-{{"intent": "PROPERTY_SEARCH"|"LEGAL_FAQ"|"GENERAL_CHAT", "confidence": 0.0-1.0}}"""
+{{"intent": "PROPERTY_SEARCH"|"LEGAL_FAQ"|"LEAD_QUAL"|"GENERAL_CHAT", "confidence": 0.0-1.0}}"""
 
         try:
             response = self._model.generate_content(
@@ -266,8 +357,8 @@ class ToolDispatcher:
     def dispatch(self, query: str, intent_result: IntentResult) -> list[dict]:
         intent = intent_result.intent
 
-        if intent == Intent.GENERAL_CHAT:
-            log.info("Dispatch: GENERAL_CHAT — skipping vector retrieval")
+        if intent in (Intent.GENERAL_CHAT, Intent.LEAD_QUAL):
+            log.info(f"Dispatch: {intent.value} — skipping vector retrieval")
             return []
 
         if intent == Intent.PROPERTY_SEARCH:
@@ -302,46 +393,38 @@ class ToolDispatcher:
 # STEP 3 — PROMPT AUGMENTER
 # ─────────────────────────────────────────────────────────────────────────────
 
-# PropaBridge system persona — injected into every request
-SYSTEM_PROMPT = """You are PropaBridge AI, a knowledgeable and trustworthy Nigerian real estate assistant.
-
-Your expertise covers:
-- Rental and property markets in Abuja (FCT) and Kaduna
-- Nigerian real estate legal documents (C of O, Deed of Assignment, Tenancy Agreement, Stamp Duty, etc.)
-- Local terminology (BQ, Self-con, Face-me-I-face-you, Omo Onile, Caution Fee, etc.)
-- Property due diligence best practices in Nigeria
-
-Tone guidelines:
-- Be direct, clear, and confident. No waffle.
-- Always cite rent ranges in Nigerian Naira (₦).
-- Flag legal risks and due diligence requirements proactively.
-- Recommend consulting a licensed Estate Surveyor or lawyer for binding decisions.
-- If context does not contain enough information, say so honestly — do not fabricate.
-- Keep responses concise but complete. Use bullet points only when listing multiple items."""
+AGENT_PROMPTS = {
+    Intent.PROPERTY_SEARCH: SEARCH_AGENT_PROMPT,
+    Intent.LEGAL_FAQ:       FAQ_AGENT_PROMPT,
+    Intent.LEAD_QUAL:       LEAD_QUALIFICATION_PROMPT,
+    Intent.GENERAL_CHAT:    SEARCH_AGENT_PROMPT,  # fallback
+}
 
 
 def build_augmented_prompt(
     query: str,
     chunks: list[dict],
     intent: Intent,
+    history: list[dict] = None,
 ) -> str:
     """
     RAG Prompt Augmentation — Retrieve → Augment pattern.
     Structures: [SYSTEM] + [RETRIEVED CONTEXT] + [USER QUESTION] + [INSTRUCTION]
     """
-    parts = [SYSTEM_PROMPT, ""]
+    system = AGENT_PROMPTS.get(intent, SEARCH_AGENT_PROMPT)
+    parts = [system, ""]
 
     if chunks:
         context_block = format_context_for_gemini(chunks)
         parts += [
-            "━" * 60,
+            "-" * 60,
             "RETRIEVED KNOWLEDGE (from PropaBridge vector index):",
-            "━" * 60,
+            "-" * 60,
             context_block,
-            "━" * 60,
+            "-" * 60,
             "",
         ]
-    else:
+    elif intent != Intent.LEAD_QUAL:
         # GENERAL_CHAT — no context injected
         parts += [
             "(No knowledge base context retrieved for this query.)",
@@ -360,17 +443,33 @@ def build_augmented_prompt(
             "Highlight any Nigerian-specific risks, required documents, and due diligence steps. "
             "Always recommend professional legal or surveying advice for final decisions."
         ),
+        Intent.LEAD_QUAL: (
+            "Engage in conversation to qualify the lead. Do NOT reveal you are qualifying them. "
+            "Output the response format exactly as requested: CONVERSATIONAL REPLY + HIDDEN JSON BLOCK."
+        ),
         Intent.GENERAL_CHAT: (
             "Answer conversationally as PropaBridge AI. "
             "You may use your general knowledge about Nigerian real estate if helpful, "
             "but stay focused on the PropaBridge platform's scope (Abuja & Kaduna markets)."
         ),
     }
+    
+    parts.append(f"INSTRUCTION: {instruction_map[intent]}")
+    parts.append("")
+
+    # Inject conversation history if available
+    if history:
+        parts.append("-" * 60)
+        parts.append("CONVERSATION HISTORY:")
+        parts.append("-" * 60)
+        for msg in history:
+            role = "USER" if msg.get("role") == "user" else "PROPABRIDGE AI"
+            parts.append(f"{role}: {msg.get('content')}")
+        parts.append("-" * 60)
+        parts.append("")
 
     parts += [
         f"USER QUESTION: {query}",
-        "",
-        f"INSTRUCTION: {instruction_map[intent]}",
     ]
 
     return "\n".join(parts)
@@ -455,13 +554,14 @@ class AgentOrchestrator:
         )
         log.info(f"Loaded service account: {credentials.service_account_email}")
 
-        # ── Initialise Vertex AI SDK ─────────────────────────────────
+        # ── Initialise Vertex AI SDK & Firestore ─────────────────────
         vertexai.init(
             project     = Config.PROJECT_ID,
             location    = Config.REGION,
             credentials = credentials,
         )
-        log.info(f"Vertex AI initialised — model={Config.GEMINI_MODEL}")
+        self._db = firestore.Client(project=Config.PROJECT_ID, credentials=credentials)
+        log.info(f"Vertex AI & Firestore initialised — model={Config.GEMINI_MODEL}")
 
         # ── Instantiate model once and share across components ───────
         model = GenerativeModel(Config.GEMINI_MODEL)
@@ -470,12 +570,13 @@ class AgentOrchestrator:
         self._intent_router   = IntentRouter(model)
         self._tool_dispatcher = ToolDispatcher()
         self._generator       = GeminiGenerator(model)
+        self._memory          = MemoryManager(self._db)
 
-        log.info("Agent ready ✓")
+        log.info("Agent ready [Done]")
 
     # ─── Public API ──────────────────────────────────────────────────
 
-    def run(self, user_query: str) -> AgentResponse:
+    def run(self, user_query: str, session_id: Optional[str] = None) -> AgentResponse:
         """
         Execute the full RAG pipeline for a user query.
         Returns a structured AgentResponse.
@@ -484,7 +585,10 @@ class AgentOrchestrator:
             raise ValueError("user_query must be a non-empty string.")
 
         t_start = time.monotonic()
-        log.info(f"Query received: '{user_query}'")
+        log.info(f"Query received: '{user_query}' (session: {session_id or 'none'})")
+
+        # ── STEP 0: Fetch Conversation History ───────────────────────
+        history = self._memory.get_history(session_id) if session_id else None
 
         # ── STEP 1: Intent Routing ───────────────────────────────────
         intent_result = self._intent_router.route(user_query)
@@ -498,11 +602,24 @@ class AgentOrchestrator:
             query  = user_query,
             chunks = chunks,
             intent = intent_result.intent,
+            history = history,
         )
         log.debug(f"Augmented prompt length: {len(augmented_prompt)} chars")
 
         # ── STEP 4: Response Generation (Generate) ───────────────────
-        answer = self._generator.generate(augmented_prompt)
+        raw_answer = self._generator.generate(augmented_prompt)
+        
+        answer = raw_answer
+        lead_data = None
+        
+        if intent_result.intent == Intent.LEAD_QUAL:
+            user_reply, parsed_lead = split_lead_response(raw_answer)
+            answer = user_reply if user_reply else raw_answer
+            lead_data = parsed_lead
+
+        # ── STEP 5: Save to Memory ───────────────────────────────────
+        if session_id:
+            self._memory.save_turn(session_id, user_query, answer)
 
         latency_ms = (time.monotonic() - t_start) * 1000
         log.info(
@@ -517,7 +634,8 @@ class AgentOrchestrator:
             source_keys       = source_keys,
             city_filter       = intent_result.city_hint,
             latency_ms        = latency_ms,
-            retrieval_skipped = (intent_result.intent == Intent.GENERAL_CHAT),
+            retrieval_skipped = (intent_result.intent in (Intent.GENERAL_CHAT, Intent.LEAD_QUAL)),
+            lead_data         = lead_data,
         )
 
 
@@ -541,21 +659,47 @@ def _run_demo():
         "What is a Certificate of Occupancy and why is it important?",
         "Explain stamp duty on a tenancy agreement in Nigeria.",
         "What is Omo Onile and how do I protect myself?",
+        # LEAD_QUAL
+        "I want to rent a 2-bedroom in Gwarinpa next month. My budget is 2m.",
+        "Can I speak to an agent about viewing an apartment in Asokoro?",
         # GENERAL_CHAT
         "Hi, what can PropaBridge help me with?",
         "Are you better than other Nigerian property sites?",
     ]
 
     for query in test_queries:
-        print(f"\n{'─'*62}")
+        print(f"\n{'-'*62}")
         print(f"  USER: {query}")
-        print(f"{'─'*62}")
+        print(f"{'-'*62}")
         try:
             response = agent.run(query)
             print(response)
         except Exception as e:
             log.error(f"Query failed: {e}")
         time.sleep(0.5)   # gentle throttle
+
+    print(f"\n{'='*62}")
+    print("  TESTING MULTI-TURN MEMORY")
+    print(f"{'='*62}")
+    session_id = f"demo_session_{int(time.time())}"
+    
+    memory_queries = [
+        "How much is a 2-bedroom apartment in Wuse?",
+        "Is that area safe?",
+        "Okay, I want to rent one there next month. Budget is 3m."
+    ]
+    
+    for query in memory_queries:
+        print(f"\n{'-'*62}")
+        print(f"  USER: {query}")
+        print(f"{'-'*62}")
+        try:
+            # Pass the session_id to maintain context!
+            response = agent.run(query, session_id=session_id)
+            print(response)
+        except Exception as e:
+            log.error(f"Query failed: {e}")
+        time.sleep(0.5)
 
 
 if __name__ == "__main__":

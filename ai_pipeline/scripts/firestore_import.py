@@ -27,6 +27,6 @@ for i in range(0, len(docs), BATCH_SIZE):
         ref = db.collection(COLLECTION).document(doc["chunk_id"])
         batch.set(ref, doc)
     batch.commit()
-    print(f"  ✓ Committed batch {i // BATCH_SIZE + 1}")
+    print(f"  > Committed batch {i // BATCH_SIZE + 1}")
 
-print("\n✅ Firestore import complete!")
+print("\n[Done] Firestore import complete!")
